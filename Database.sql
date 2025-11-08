@@ -189,4 +189,5 @@ INSERT INTO match_appearances VALUES
 (510, 207, 6, 70, NULL, 0, 0),                                               -- Messi (rating not recorded)
 (511, 207, 9, 90, 7.0, 0, 0),                                                -- Busquets
 (512, 204, 4, NULL, 7.5, 0, 0);                                              -- De Bruyne (minutes not recorded)
+
 -- Note: Hazard (10) and Bale (11) retired - NO recent appearances (KILLER #1)
