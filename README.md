@@ -6,10 +6,13 @@ Common SQL mistakes that silently eliminate rows due to NULL handling, with exec
 
 ## NULL KILLER #1: LEFT JOIN + WHERE Filter
 
+### 📋 Scenario: Get all patients and their completed lab results
+*Critical: Many patients have pending/refused tests - NO results yet!*
+
 ### The Problem
 WHERE clause filters are applied AFTER the join completes, eliminating NULL rows and converting LEFT JOIN to INNER JOIN.
 
-### ❌ WRONG - Lost 5 patients
+### ❌ WRONG - Lost 5 patients (6 shown, 12 exist)
 ```sql
 SELECT p.patient_id, p.full_name, lr.result_date
 FROM patients p
@@ -40,10 +43,13 @@ LEFT JOIN lab_results lr
 
 ## NULL KILLER #2: WHERE col <> value
 
+### 📋 Scenario: Find physicians who are NOT cardiologists
+*Critical: General practitioners have NULL specialty!*
+
 ### The Problem
 SQL uses three-valued logic: TRUE, FALSE, UNKNOWN. NULL comparisons return UNKNOWN, which WHERE treats as FALSE.
 
-### ❌ WRONG - Lost 1 physician
+### ❌ WRONG - Lost 1 physician (6 shown, 8 exist)
 ```sql
 SELECT physician_id, full_name, specialty
 FROM physicians
@@ -55,7 +61,7 @@ WHERE specialty <> 'Cardiology';  -- 🚨 NULL <> 'Cardiology' → UNKNOWN → e
 - `'Cardiology' <> 'Cardiology'` → FALSE ❌
 - `NULL <> 'Cardiology'` → UNKNOWN ❌ (treated as FALSE in WHERE)
 
-### ✅ CORRECT - Includes NULL specialties
+### ✅ CORRECT - Includes NULL specialties (7 shown)
 ```sql
 SELECT physician_id, full_name, specialty
 FROM physicians
@@ -68,6 +74,9 @@ WHERE specialty <> 'Cardiology'
 ---
 
 ## NULL KILLER #3: Aggregations Ignore NULL
+
+### 📋 Scenario: Calculate average admission cost
+*Critical: Many admissions have NULL cost (charity care, ongoing, insurance processing)!*
 
 ### The Problem
 Aggregate functions (AVG, SUM, COUNT(column)) skip NULL values at the storage level, potentially skewing results.
@@ -107,10 +116,13 @@ FROM admissions;
 
 ## NULL KILLER #4: NOT IN with NULL
 
+### 📋 Scenario: Find patients NOT covered by Blue Cross or United Healthcare
+*Critical: Many patients have NULL insurance (uninsured, unknown)!*
+
 ### The Problem
 When NULL is in the NOT IN list, three-valued logic causes the entire query to return zero rows.
 
-### ❌ WRONG - Returns 0 rows!
+### ❌ WRONG - Returns 0 rows! (12 patients exist)
 ```sql
 SELECT patient_id, insurance_provider
 FROM patients
